@@ -43,6 +43,7 @@ def execute_step(
         if step_type == "code":
             code = step.get("code", "")
             validate_analysis_code(code)
+            existing_pngs = {str(p.resolve()) for p in output_dir.glob("*.png")}
             local_vars: dict[str, Any] = {
                 "df": df.copy(),
                 "pd": pd,
@@ -72,9 +73,8 @@ def execute_step(
             )
             plt.close("all")
             msg = stdout.getvalue().strip() or "Code executed successfully."
-            for p in output_dir.glob("*.png"):
-                if p.stat().st_mtime > output_dir.stat().st_mtime - 5:
-                    artifacts.append(str(p))
+            current_pngs = {str(p.resolve()) for p in output_dir.glob("*.png")}
+            artifacts.extend(sorted(current_pngs - existing_pngs))
             return True, msg, artifacts
 
         return False, f"Unknown step type: {step_type}", []

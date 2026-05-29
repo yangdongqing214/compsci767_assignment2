@@ -122,6 +122,53 @@ def _parse_llm_json(text: str) -> list[dict[str, Any]]:
     return json.loads(match.group())
 
 
+def _normalize_step(step: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
+    """Normalize planner output into builtin tool parameter conventions."""
+    normalized = dict(step)
+    if normalized.get("type") != "builtin":
+        return normalized
+
+    tool = normalized.get("tool")
+    params = dict(normalized.get("params", {}) or {})
+    numeric = profile.get("numeric_columns", [])
+    categorical = profile.get("categorical_columns", [])
+
+    if tool == "plot_bar_categorical":
+        # Accept common LLM aliases and fall back to the first categorical column.
+        params["column"] = params.get("column") or params.get("x")
+        if not params.get("column") and categorical:
+            params["column"] = categorical[0]
+        if "y" in params and "value_col" not in params:
+            params["value_col"] = params["y"]
+
+    elif tool == "groupby_aggregate":
+        # Accept list-based keys often emitted by LLM planners.
+        if "group_col" not in params and "groupby_columns" in params:
+            group_cols = params.get("groupby_columns") or []
+            if group_cols:
+                params["group_col"] = group_cols[0]
+        if "value_col" not in params:
+            if "aggregate_columns" in params and params["aggregate_columns"]:
+                params["value_col"] = params["aggregate_columns"][0]
+            elif numeric:
+                params["value_col"] = numeric[0]
+        if "aggfunc" in params and "agg" not in params:
+            params["agg"] = params["aggfunc"]
+        if "group_col" not in params and categorical:
+            params["group_col"] = categorical[0]
+        params.setdefault("agg", "sum")
+
+    normalized["params"] = params
+    return normalized
+
+
+def normalize_plan_steps(
+    steps: list[dict[str, Any]], profile: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Normalize and lightly validate planner output for robust execution."""
+    return [_normalize_step(step, profile) for step in steps]
+
+
 def plan_analysis_steps(
     goal: str,
     profile: dict[str, Any],
@@ -133,7 +180,8 @@ def plan_analysis_steps(
     """
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
-        return _heuristic_plan(profile, goal), "heuristic"
+        steps = _heuristic_plan(profile, goal)
+        return normalize_plan_steps(steps, profile), "heuristic"
 
     try:
         from openai import OpenAI
@@ -155,9 +203,11 @@ def plan_analysis_steps(
         )
         content = resp.choices[0].message.content or "[]"
         steps = _parse_llm_json(content)
+        steps = normalize_plan_steps(steps, profile)
         return steps, "llm"
     except Exception:
-        return _heuristic_plan(profile, goal), "heuristic"
+        steps = _heuristic_plan(profile, goal)
+        return normalize_plan_steps(steps, profile), "heuristic"
 
 
 def summarize_results(

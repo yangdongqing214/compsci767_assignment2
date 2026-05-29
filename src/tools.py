@@ -61,10 +61,27 @@ def plot_histogram(df: pd.DataFrame, column: str, output_dir: Path) -> str:
     return str(out)
 
 
-def plot_bar_categorical(df: pd.DataFrame, column: str, output_dir: Path) -> str:
+def plot_bar_categorical(
+    df: pd.DataFrame,
+    column: str,
+    output_dir: Path,
+    value_col: str | None = None,
+) -> str:
     if column not in df.columns:
         raise ValueError(f"Column not found: {column}")
-    counts = df[column].value_counts().head(10)
+    if value_col:
+        if value_col not in df.columns:
+            raise ValueError(f"Column not found: {value_col}")
+        if not pd.api.types.is_numeric_dtype(df[value_col]):
+            raise ValueError(f"Column {value_col} is not numeric")
+        counts = (
+            df.groupby(column, dropna=False)[value_col]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+        )
+    else:
+        counts = df[column].value_counts().head(10)
     fig, ax = plt.subplots(figsize=(8, 5))
     counts.plot(kind="bar", ax=ax, color="steelblue")
     ax.set_title(f"Top categories: {column}")
@@ -124,11 +141,28 @@ def run_builtin_tool(
     if tool_name == "missing_report":
         return fn(df)
     if tool_name == "plot_histogram":
-        return fn(df, params["column"], output_dir)
+        column = params.get("column") or params.get("x")
+        if not column:
+            raise ValueError("plot_histogram requires 'column'")
+        return fn(df, column, output_dir)
     if tool_name == "plot_bar_categorical":
-        return fn(df, params["column"], output_dir)
+        column = params.get("column") or params.get("x")
+        if not column:
+            raise ValueError("plot_bar_categorical requires 'column' or 'x'")
+        value_col = params.get("value_col") or params.get("y")
+        return fn(df, column, output_dir, value_col=value_col)
     if tool_name == "plot_correlation_heatmap":
         return fn(df, output_dir)
     if tool_name == "groupby_aggregate":
-        return fn(df, params["group_col"], params["value_col"], params.get("agg", "sum"))
+        group_col = params.get("group_col")
+        if not group_col and params.get("groupby_columns"):
+            group_col = params["groupby_columns"][0]
+        value_col = params.get("value_col")
+        if not value_col and params.get("aggregate_columns"):
+            value_col = params["aggregate_columns"][0]
+        if not group_col or not value_col:
+            raise ValueError(
+                "groupby_aggregate requires group/value columns (group_col/value_col)"
+            )
+        return fn(df, group_col, value_col, params.get("agg", params.get("aggfunc", "sum")))
     raise ValueError(f"Unhandled tool: {tool_name}")
