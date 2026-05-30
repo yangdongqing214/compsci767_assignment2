@@ -2,11 +2,7 @@
 
 An intelligent software agent that **perceives** a CSV dataset, **plans** analysis steps toward a user goal, **acts** via tools and sandboxed code execution, and **summarizes** findings with session memory.
 
-## Demo video
-
-Record a ~2-minute screen capture running the commands in [DEMO_SCRIPT.md](DEMO_SCRIPT.md), upload to YouTube/Drive, and add the link here:
-
-`YOUR_DEMO_VIDEO_URL`
+**GitHub:** https://github.com/yangdongqing214/compsci767_assignment2
 
 ## Quick start
 
@@ -81,15 +77,4 @@ data-analysis-agent/
 └── report/REPORT.md        # template for 2-page PDF submission
 ```
 
-## Suggested commit checkpoints (for GitHub)
 
-1. `feat: scaffold agent loop and sample CSV`
-2. `feat: builtin analysis tools and plotting`
-3. `feat: heuristic planner and session memory`
-4. `feat: optional OpenAI planner + summarizer`
-5. `feat: safety validation for code steps`
-6. `docs: README, demo script, report template`
-
-## Author
-
-COMPSCI 767 — Intelligent Software Agents, University of Auckland.

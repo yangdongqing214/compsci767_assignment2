@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import traceback
 from io import StringIO
 from pathlib import Path
@@ -16,6 +17,30 @@ import seaborn as sns
 
 from .safety import UnsafeCodeError, validate_analysis_code
 from .tools import run_builtin_tool
+
+_PRELOADED_IMPORT_ROOTS = frozenset({"pandas", "matplotlib", "seaborn", "numpy"})
+
+
+def _import_root(module_name: str) -> str:
+    return module_name.split(".")[0]
+
+
+def prepare_sandbox_code(code: str) -> str:
+    """Remove imports for modules already injected into the code sandbox."""
+    tree = ast.parse(code)
+    cleaned: list[ast.stmt] = []
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            roots = {_import_root(alias.name) for alias in node.names}
+            if roots <= _PRELOADED_IMPORT_ROOTS:
+                continue
+        elif isinstance(node, ast.ImportFrom):
+            if node.module and _import_root(node.module) in _PRELOADED_IMPORT_ROOTS:
+                continue
+        cleaned.append(node)
+    if not cleaned:
+        raise ValueError("Code step is empty after removing redundant imports")
+    return ast.unparse(ast.Module(body=cleaned, type_ignores=[]))
 
 
 def execute_step(
@@ -41,7 +66,7 @@ def execute_step(
             return True, result, artifacts
 
         if step_type == "code":
-            code = step.get("code", "")
+            code = prepare_sandbox_code(step.get("code", ""))
             validate_analysis_code(code)
             existing_pngs = {str(p.resolve()) for p in output_dir.glob("*.png")}
             local_vars: dict[str, Any] = {

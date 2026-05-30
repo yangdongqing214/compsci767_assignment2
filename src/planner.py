@@ -18,7 +18,9 @@ Each step is an object with:
 - params: (if builtin) dict of parameters, e.g. {"column": "units"}
 - code: (if code) short pandas/matplotlib snippet using only df, pd, plt, sns.
   Save plots to output_dir with plt.savefig(f"{output_dir}/custom_plot.png")
-Rules: no file reads, no network, no os/subprocess. Prefer builtin tools.
+Rules: no file reads, no network, no os/subprocess. Prefer builtin tools for plots
+and statistics. For code steps never use import statements — df, pd, plt, sns, and
+output_dir are already available in the sandbox.
 Output ONLY valid JSON array, no markdown."""
 
 

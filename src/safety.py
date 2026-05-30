@@ -65,11 +65,17 @@ def validate_analysis_code(code: str) -> None:
                 root = alias.name.split(".")[0]
                 if root in BLOCKED_IMPORTS:
                     raise UnsafeCodeError(f"Blocked import: {alias.name}")
+            raise UnsafeCodeError(
+                "Imports not allowed in code steps; use preloaded df, pd, plt, sns, output_dir"
+            )
         elif isinstance(node, ast.ImportFrom):
             if node.module:
                 root = node.module.split(".")[0]
                 if root in BLOCKED_IMPORTS:
                     raise UnsafeCodeError(f"Blocked import from: {node.module}")
+            raise UnsafeCodeError(
+                "Imports not allowed in code steps; use preloaded df, pd, plt, sns, output_dir"
+            )
         elif isinstance(node, ast.Call):
             func = node.func
             name = None
