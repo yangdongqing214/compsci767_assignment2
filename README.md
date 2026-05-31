@@ -20,15 +20,13 @@ Outputs appear under `output/<timestamp>/` (plots, `plan.json`, `report.md`, `se
 
 ### Optional LLM planning (recommended for demo)
 
-**For grading:** submit your `.env` file separately via the **course assignment upload page** (not in the GitHub repo). The marker should place that file in the project root (`data-analysis-agent/`, next to `main.py`) before running.
-
-**For local runs:** put the same `.env` in the project root, then:
+**LLM mode:** submit your `.env` via the **course assignment upload page** (not GitHub — push protection blocks API keys). The marker places it in the project root (`data-analysis-agent/`, next to `main.py`) before running.
 
 ```bash
 python main.py --goal "Find which region has the highest revenue and any missing data"
 ```
 
-Without `.env` / `OPENAI_API_KEY`, the agent uses a **heuristic planner** (fully offline, reproducible). `.env` is listed in `.gitignore` and must not be pushed to GitHub.
+Without `.env` / `OPENAI_API_KEY`, the agent uses a **heuristic planner** (fully offline, reproducible).
 
 ### Custom CSV and goal
 
