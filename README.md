@@ -4,6 +4,8 @@ An intelligent software agent that **perceives** a CSV dataset, **plans** analys
 
 **GitHub:** https://github.com/yangdongqing214/compsci767_assignment2
 
+**Demo video:** see the `videos/COMPSCI 767_Assignment2_Dongqing_Yang_291140653.mp4` (~2-minute screen recording).
+
 ## Quick start
 
 ```bash
@@ -72,6 +74,7 @@ data-analysis-agent/
 │   ├── memory.py           # session memory
 │   └── safety.py           # code sandbox checks
 ├── sample_data/sales.csv
+├── videos/                 # ~2-minute demo video
 ├── output/                 # generated (gitignored)
 ├── DEMO_SCRIPT.md          # 2-minute video script
 └── report/REPORT.md        # template for 2-page PDF submission
