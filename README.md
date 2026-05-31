@@ -4,7 +4,7 @@ An intelligent software agent that **perceives** a CSV dataset, **plans** analys
 
 **GitHub:** https://github.com/yangdongqing214/compsci767_assignment2
 
-**Demo video:** [Google Drive](https://drive.google.com/file/d/1OC8XZ6micZoxGgzhzwfMAQEkF-NoU0Wd/view?usp=drive_link) (~2-minute screen recording; local copy in `videos/`).
+**Demo video:** [Google Drive](https://drive.google.com/file/d/1OC8XZ6micZoxGgzhzwfMAQEkF-NoU0Wd/view?usp=drive_link) (~2-minute screen recording).
 
 ## Quick start
 
