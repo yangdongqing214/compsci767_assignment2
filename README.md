@@ -74,10 +74,9 @@ data-analysis-agent/
 │   ├── memory.py           # session memory
 │   └── safety.py           # code sandbox checks
 ├── sample_data/sales.csv
-├── videos/                 # ~2-minute demo video
 ├── output/                 # generated (gitignored)
 ├── DEMO_SCRIPT.md          # 2-minute video script
-└── report/REPORT.md        # template for 2-page PDF submission
+└── report/COMPSCI 767_A2_REPORT_Dongqing_Yang_291140653.pdf        # 2-page PDF submission
 ```
 
 
